@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Translator</title>
+</head>
+<body>
+    <h1>Excel Translator</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <label for="file">Upload Excel File:</label>
+        <input type="file" name="file" id="file" required>
+        <br><br>
+        <label for="source_col">Source Column:</label>
+        <input type="text" name="source_col" id="source_col" placeholder="source" required>
+        <br><br>
+        <label for="target_col">Target Column:</label>
+        <input type="text" name="target_col" id="target_col" placeholder="target" required>
+        <br><br>
+        <label for="target_lang">Target Language:</label>
+        <input type="text" name="target_lang" id="target_lang" placeholder="de (German)" required>
+        <br><br>
+        <button type="submit">Translate</button>
+    </form>
+</body>
+</html>
