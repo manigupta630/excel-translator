@@ -16,11 +16,12 @@
             width: 80%;
             margin: 0 auto;
         }
-        .form-container {
+        .form-container, .progress-container {
             background-color: #f4f4f4;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
         }
         label {
             font-weight: bold;
@@ -31,24 +32,21 @@
             width: 100%;
             border-radius: 4px;
         }
-        .file-info, .translate-section {
+        .progress-bar {
+            width: 100%;
+            background-color: #f3f3f3;
+            border-radius: 5px;
+            overflow: hidden;
             margin-top: 20px;
         }
-        .loading {
+        .progress-bar-fill {
+            height: 20px;
+            width: 0%;
+            background-color: #3498db;
             text-align: center;
-            display: none;
-        }
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 2s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            line-height: 20px;
+            color: white;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -64,8 +62,8 @@
             </form>
         </div>
 
-        <div id="file-info" class="file-info"></div>
-        <div id="translate-section" class="translate-section" style="display: none;">
+        <div id="file-info"></div>
+        <div id="progress-container" class="progress-container" style="display: none;">
             <label for="target_lang">Target Language:</label>
             <select name="target_lang" id="target_lang">
                 <option value="de" selected>German (de)</option>
@@ -74,20 +72,20 @@
                 <option value="es">Spanish (es)</option>
                 <option value="it">Italian (it)</option>
             </select>
+            <br>
             <button id="translate-button">Translate File</button>
-        </div>
-
-        <div id="loading" class="loading">
-            <p>Translating your file... <div class="spinner"></div></p>
+            <div class="progress-bar">
+                <div id="progress-bar-fill" class="progress-bar-fill">0%</div>
+            </div>
         </div>
     </div>
 
     <script>
         const uploadForm = document.querySelector('#upload-form');
         const fileInfoDiv = document.querySelector('#file-info');
-        const translateSection = document.querySelector('#translate-section');
+        const progressContainer = document.querySelector('#progress-container');
+        const progressBarFill = document.querySelector('#progress-bar-fill');
         const translateButton = document.querySelector('#translate-button');
-        const loadingSpinner = document.querySelector('#loading');
         let uploadedFilePath = '';
 
         // Handle file upload
@@ -107,41 +105,65 @@
                 return;
             }
 
-            uploadedFilePath = data.file_path; // Store the file path for the next step
+            uploadedFilePath = data.file_path; // Store the file path
             fileInfoDiv.innerHTML = `
                 <h3>File Information:</h3>
                 <p><strong>Total Rows:</strong> ${data.file_info.total_rows}</p>
                 <p><strong>Total Columns:</strong> ${data.file_info.total_columns}</p>
                 <p><strong>Column Names:</strong> ${data.file_info.column_names.join(', ')}</p>
             `;
-            translateSection.style.display = 'block';
+            progressContainer.style.display = 'block';
         };
 
-        // Handle translation
+        // Handle translation progress
         translateButton.onclick = async function() {
             const targetLang = document.querySelector('#target_lang').value;
 
-            // Show the loading spinner
-            loadingSpinner.style.display = 'block';
-
-            const response = await fetch('/translate', {
+            // POST request to /translate_progress
+            const response = await fetch('/translate_progress', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ file_path: uploadedFilePath, target_lang: targetLang })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    file_path: uploadedFilePath,
+                    target_lang: targetLang
+                })
             });
 
-            const data = await response.json();
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let progress = 0;
 
-            // Hide the loading spinner
-            loadingSpinner.style.display = 'none';
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
 
-            if (data.status === 'error') {
-                alert(data.message);
-                return;
+                const chunk = decoder.decode(value, { stream: true });
+                const messages = chunk.split('\n').filter(Boolean);
+
+                for (const message of messages) {
+                    if (message.startsWith('data: ')) {
+                        const data = message.replace('data: ', '').trim();
+
+                        if (data.includes('complete|')) {
+                            const [_, downloadUrl] = data.split('|');
+                            progressBarFill.style.width = '100%';
+                            progressBarFill.textContent = '100%';
+                            progressContainer.innerHTML += `<p><a href="${downloadUrl}" target="_blank">Download Translated File</a></p>`;
+                            return; // Translation completed
+                        } else if (data.includes('error|')) {
+                            const [_, errorMessage] = data.split('|');
+                            alert(`Error: ${errorMessage}`);
+                            return; // Stop on error
+                        } else {
+                            progress = parseInt(data);
+                            progressBarFill.style.width = `${progress}%`;
+                            progressBarFill.textContent = `${progress}%`;
+                        }
+                    }
+                }
             }
-
-            alert('Translation complete! Download your file below.');
-            fileInfoDiv.innerHTML += `<p><strong>Download Translated File:</strong> <a href="${data.download_url}" target="_blank">Download</a></p>`;
         };
     </script>
 </body>

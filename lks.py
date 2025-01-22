@@ -1,3 +1,6 @@
-a =2
-b = 3
-print(a)
+translator_project/
+├── app.py
+├── requirements.txt
+├── static/
+├── templates/
+└── uploads/
