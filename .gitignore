@@ -11,10 +11,11 @@
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 
-# Templates Directory 
-templates/index11.html
-templates/indexcc.html
-templates/indexm.html
+# Ignore all files in the templates directory
+templates/*
+
+# Explicitly include only these files
+!templates/index.html
 
 # Environment Configuration
 .env
