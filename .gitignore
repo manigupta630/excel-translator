@@ -1,0 +1,26 @@
+# Node.js Dependencies
+/node_modules
+/node_modules/*
+
+# Python Virtual Environment
+/venv
+/venv/*
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+# Templates Directory (Exclude all except specific files)
+templates/*
+!templates/index11.html
+!templates/indexcc.html
+!templates/indexm.html
+
+# Environment Configuration
+.env
+
+# Miscellaneous Files
+requirement.txt
+test.txt
+tests3.py

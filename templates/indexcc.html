@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Translator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f1f3f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #495057;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #343a40;
+            margin-bottom: 30px;
+        }
+
+        .wrapper {
+            margin: auto;
+            max-width: 640px;
+            text-align: center;
+        }
+
+        .upload-container {
+            background-color: rgb(239, 239, 239);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+
+        .border-container {
+            border: 5px dashed rgba(198, 198, 198, 0.65);
+            padding: 20px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .border-container:hover {
+            border-color: rgba(22, 42, 255, 0.65);
+        }
+
+        .border-container p {
+            color: #130f40;
+            font-weight: 600;
+            font-size: 1.1em;
+            letter-spacing: -1px;
+            margin-top: 30px;
+            margin-bottom: 0;
+            opacity: 0.65;
+        }
+
+        #file-browser {
+            text-decoration: none;
+            color: rgb(22, 42, 255);
+            border-bottom: 3px dotted rgba(22, 22, 255, 0.85);
+        }
+
+        #file-browser:hover {
+            color: rgb(0, 0, 255);
+            border-bottom: 3px dotted rgba(0, 0, 255, 0.85);
+        }
+
+        .icons {
+            color: #95afc0;
+            opacity: 0.55;
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        #file-upload {
+            display: none;
+        }
+
+        .info-container {
+            display: grid;
+            gap: 15px;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            font-size: 1rem;
+            color: #495057;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .info-item strong {
+            color: #343a40;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #007bff;
+            word-wrap: break-word;
+            max-width: 200px;
+            text-align: right;
+        }
+
+        .selector-container {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        select {
+            width: 100%;
+            max-width: 200px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            font-size: 16px;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            border-color: #007bff;
+        }
+
+        .progress-container {
+            width: 100%;
+            max-width: 400px;
+            display: none;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 40px;
+            /* Increased height */
+            background-color: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 5px;
+            /* Added padding */
+        }
+
+        #translate-button {
+            padding: 12px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 75%;
+            transition: background-color 0.3s;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #28a745;
+            width: 0%;
+            text-align: center;
+            line-height: 30px;
+            /* Adjusted line-height to align text */
+            color: white;
+            font-weight: bold;
+            border-radius: 15px 15px 15px 15px;
+            transition: width 0.5s ease;
+        }
+
+        .download-button {
+            padding: 12px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            display: none;
+            margin-top: 30px;
+            /* Added margin-top to center button */
+            margin-left: auto;
+            margin-right: auto;
+            width: fit-content;
+            /* Ensured button fits content */
+        }
+
+        .download-button:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Excel File Translator</h1>
+
+        <div class="wrapper">
+            <div class="upload-container">
+                <div class="border-container" id="drop-area">
+                    <input type="file" id="file-upload" accept=".xlsx, .xls">
+                    <a href="#" id="file-browser">
+                    <div class="icons">
+                        <i class="fas fa-file-image" data-fa-transform="shrink-3 down-2 left-6 rotate--45"></i>
+                        <i class="fas fa-file-alt" data-fa-transform="shrink-2 up-4"></i>
+                        <i class="fas fa-file-pdf" data-fa-transform="shrink-3 down-2 right-6 rotate-45"></i>
+                    </div>
+                    <p>Drag and drop files here, or
+                        browse your computer.
+                    </p>
+                </a>
+                </div>
+            </div>
+        </div>
+
+        <div id="file-info" class="info-container" style="display: none;">
+            <div class="info-item">
+                <strong>Total Rows:</strong>
+                <span id="total-rows" class="info-value"></span>
+            </div>
+            <div class="info-item">
+                <strong>Total Columns:</strong>
+                <span id="total-columns" class="info-value"></span>
+            </div>
+            <div class="info-item">
+                <strong>Column Names:</strong>
+                <span id="column-names" class="info-value"></span>
+            </div>
+        </div>
+
+        <div class="selector-container" id="selector-container">
+            <div>
+                <label for="target-lang">Target Language:</label>
+                <select name="target-lang" id="target-lang">
+                    <option value="de">German (de)</option>
+                    <option value="en">English (en)</option>
+                    <option value="fr">French (fr)</option>
+                    <option value="es">Spanish (es)</option>
+                    <option value="it">Italian (it)</option>
+                </select>
+                <button id="translate-button">Translate File</button>
+            </div>
+            <div class="progress-container" id="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" id="progress-bar-fill">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <button id="download-button" class="download-button">Download Translated File</button>
+    </div>
+
+    <script>
+        const dropArea = document.getElementById('drop-area');
+        const fileUpload = document.getElementById('file-upload');
+        const fileBrowser = document.getElementById('file-browser');
+        const fileInfo = document.getElementById('file-info');
+        const selectorContainer = document.getElementById('selector-container');
+        const translateButton = document.getElementById('translate-button');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBarFill = document.getElementById('progress-bar-fill');
+        const downloadButton = document.getElementById('download-button');
+
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        // Highlight drop area when item is dragged over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        // Handle dropped files
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        // Handle file browser click
+        fileBrowser.addEventListener('click', (e) => {
+            e.preventDefault();
+            fileUpload.click();
+        });
+
+        // Handle file input change
+        fileUpload.addEventListener('change', handleFiles, false);
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function highlight() {
+            dropArea.style.borderColor = 'rgba(22, 42, 255, 0.65)';
+        }
+
+        function unhighlight() {
+            dropArea.style.borderColor = 'rgba(198, 198, 198, 0.65)';
+        }
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            // If called from event listener, get files from event
+            files = files.target ? files.target.files : files;
+
+            // Validate file type (Excel files)
+            const file = files[0];
+            if (!file.name.match(/\.(xlsx|xls)$/)) {
+                alert('Please upload an Excel file.');
+                return;
+            }
+
+            // Show file info (simulated for now)
+            fileInfo.style.display = 'grid';
+            document.getElementById('total-rows').textContent = 6;
+            document.getElementById('total-columns').textContent = 4;
+            document.getElementById('column-names').textContent = 'Party, DMS, Current, Unnamed: 3';
+
+            // Show language selector
+            selectorContainer.style.display = 'flex';
+        }
+
+        translateButton.addEventListener('click', () => {
+            // Show progress bar when translation starts
+            progressContainer.style.display = 'block';
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    downloadButton.style.display = 'block';
+                } else {
+                    progress += 10;
+                    progressBarFill.style.width = `${progress}%`;
+                    progressBarFill.textContent = `${progress}%`;
+                }
+            }, 500);
+        });
+
+        downloadButton.addEventListener('click', () => {
+            alert('Download initiated!');
+        });
+    </script>
+</body>
+
+</html>
