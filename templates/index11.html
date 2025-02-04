@@ -3,107 +3,310 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel Translator</title>
+    <title>Excel File Translator</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
+            font-family: 'Montserrat', sans-serif;
             margin: 0;
-            padding: 0;
+            background: linear-gradient(135deg, #ffffff, #0468C8);
+            color: #333;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+            padding: 20px;
         }
+
         .container {
-            width: 90%;
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1), 0 6px 6px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
             max-width: 600px;
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
         }
+
         h1 {
-            color: #333;
+            text-align: center;
+            color: #0C8BCF;
+            margin-top: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        .form-container, .progress-container {
-            background: #f4f4f4;
-            padding: 20px;
-            border-radius: 8px;
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        input[type="file"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-icon {
+            display: inline-block;
+            background-color: #0C8BCF;
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            text-align: center;
+            line-height: 18px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .info-icon:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: #fff;
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 5px;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #0C8BCF;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #0468C8;
+        }
+
+        .progress-container {
             margin-top: 20px;
         }
-        label {
-            font-weight: bold;
-            display: block;
-            text-align: left;
-        }
-        input[type="file"], select, button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-        }
-        button {
-            background: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        button:hover {
-            background: #0056b3;
-        }
+
         .progress-bar {
             width: 100%;
-            background: #e0e0e0;
-            border-radius: 5px;
+            height: 24px;
+            background-color: #f1f1f1;
+            border-radius: 12px;
             overflow: hidden;
-            margin-top: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .progress-bar-fill {
-            height: 20px;
-            width: 0%;
-            background: #28a745;
+            height: 100%;
+            background-color: #0C8BCF;
             text-align: center;
-            line-height: 20px;
-            color: white;
-            font-weight: bold;
+            line-height: 24px;
+            color: #fff;
+            transition: width 0.5s ease;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
-        a {
-            display: inline-block;
+
+        .download-link {
+            display: block;
             margin-top: 10px;
-            color: #007bff;
+            text-align: center;
+            color: #0C8BCF;
+            font-weight: 600;
             text-decoration: none;
-            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
-        a:hover {
-            text-decoration: underline;
+
+        .download-link:hover {
+            color: #0468C8;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Excel File Translator</h1>
-        <div class="form-container">
-            <form id="upload-form">
-                <label for="file">Upload Excel File:</label>
-                <input type="file" name="file" id="file" required>
-                <button type="submit">Upload File</button>
-            </form>
+        <div class="form-group">
+            <label for="file">Upload Excel File:</label>
+            <input type="file" name="file" id="file" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email Address: 
+                <span class="info-icon" data-tooltip="Optional: If you provide an email, we will send the translated file to your inbox once it's done.">i</span>
+            </label>
+            <input type="email" name="email" id="email" placeholder="Enter your email (optional)">
         </div>
 
-        <div id="file-info"></div>
-        <div id="progress-container" class="progress-container" style="display: none;">
-            <label for="target_lang">Target Language:</label>
-            <select name="target_lang" id="target_lang">
-                <option value="de" selected>German</option>
+        <div class="form-group">
+            <label for="source-lang">Source Language:</label>
+            <select name="source-lang" id="source-lang">
+                <option value="auto" selected>Auto</option>
                 <option value="en">English</option>
+                <option value="de">German</option>
                 <option value="fr">French</option>
                 <option value="es">Spanish</option>
                 <option value="it">Italian</option>
+                <option value="hi">Hindi</option>
+                <option value="zh">Chinese</option>
+                <option value="ja">Japanese</option>
+            </select>
+        </div>
+
+        <button id="upload-button">Upload File</button>
+
+        <div id="file-info" class="form-group" style="display: none;">
+            <label>File Information:</label>
+            <p>Total Rows: <span id="total-rows"></span></p>
+            <p>Total Columns: <span id="total-columns"></span></p>
+            <p>Column Names: <span id="column-names"></span></p>
+        </div>
+
+        <div id="translation-container" class="form-group" style="display: none;">
+            <label for="target-lang">Target Language:</label>
+            <select name="target-lang" id="target-lang">
+                <option value="de" selected>German (de)</option>
+                <option value="en">English (en)</option>
+                <option value="fr">French (fr)</option>
+                <option value="es">Spanish (es)</option>
+                <option value="it">Italian (it)</option>
+            </select>
+            <button id="translate-button">Translate File</button>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div id="progress-bar-fill" class="progress-bar-fill">0%</div>
+                </div>
+            </div>
+            <a href="#" id="download-link" class="download-link" style="display: none;">Download Translated File</a>
+        </div>
+    </div>
+
+   <script>
+const uploadButton = document.getElementById('upload-button');
+const fileInfoDiv = document.getElementById('file-info');
+const totalRowsSpan = document.getElementById('total-rows');
+const totalColumnsSpan = document.getElementById('total-columns');
+const columnNamesSpan = document.getElementById('column-names');
+const translationContainer = document.getElementById('translation-container');
+const translateButton = document.getElementById('translate-button');
+const progressBarFill = document.getElementById('progress-bar-fill');
+const downloadLink = document.getElementById('download-link');
+let uploadedFilePath = '';
+
+uploadButton.addEventListener('click', async () => {
+    const fileInput = document.getElementById('file');
+    const emailInput = document.getElementById('email');
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    formData.append('email', emailInput.value || '');
+
+    const response = await fetch('/upload', {
+        method: 'POST',
+        body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.status === 'error') {
+        alert(data.message);
+        return;
+    }
+
+    uploadedFilePath = data.file_path;
+    fileInfoDiv.style.display = 'block';
+    totalRowsSpan.textContent = data.file_info.total_rows;
+    totalColumnsSpan.textContent = data.file_info.total_columns;
+    columnNamesSpan.textContent = data.file_info.column_names.join(', ');
+    translationContainer.style.display = 'block';
+});
+
+translateButton.addEventListener('click', async () => {
+    const targetLang = document.getElementById('target-lang').value;
+    const sourceLang = document.getElementById('source-lang').value;
+    const emailInput = document.getElementById('email').value || '';
+
+    const response = await fetch('/translate_progress', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            file_path: uploadedFilePath,
+            source_lang: sourceLang, // Send source language
+            target_lang: targetLang,
+            email: emailInput
+        })
+    });
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let progress = 0;
+
+    while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const messages = chunk.split('\n').filter(Boolean);
+
+        for (const message of messages) {
+            if (message.startsWith('data: ')) {
+                const data = message.replace('data: ', '').trim();
+
+                if (data.includes('complete|')) {
+                    const [_, downloadUrl] = data.split('|');
+                    progressBarFill.style.width = '100%';
+                    progressBarFill.textContent = '100%';
+                    downloadLink.href = downloadUrl;
+                    downloadLink.style.display = 'block';
+                    return;
+                } else if (data.includes('error|')) {
+                    const [_, errorMessage] = data.split('|');
+                    alert(`Error: ${errorMessage}`);
+                    return;
+                } else {
+                    progress = parseInt(data);
+                    progressBarFill.style.width = `${progress}%`;
+                    progressBarFill.textContent = `${progress}%`;
+                }
+            }
+        }
+    }
+});
+
+   </script>
+</body>
+</html>
+
+
+
+
+<option value="de" selected>German (de)</option>
+                <option value="en">English (en)</option>
+                <option value="fr">French (fr)</option>
+                <option value="es">Spanish (es)</option>
+                <option value="it">Italian (it)</option>
                 <option value="hi">Hindi</option>
                 <option value="zh">Chinese (Simplified)</option>
                 <option value="ja">Japanese</option>
@@ -123,97 +326,3 @@
                 <option value="bn">Bengali</option>
                 <option value="ur">Urdu</option>
                 <option value="fa">Persian</option>
-            </select>
-            
-            <button id="translate-button">Translate File</button>
-            <div class="progress-bar">
-                <div id="progress-bar-fill" class="progress-bar-fill">0%</div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const uploadForm = document.querySelector('#upload-form');
-        const fileInfoDiv = document.querySelector('#file-info');
-        const progressContainer = document.querySelector('#progress-container');
-        const progressBarFill = document.querySelector('#progress-bar-fill');
-        const translateButton = document.querySelector('#translate-button');
-        let uploadedFilePath = '';
-
-        uploadForm.onsubmit = async function(event) {
-            event.preventDefault();
-            const formData = new FormData(uploadForm);
-
-            const response = await fetch('/upload', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (data.status === 'error') {
-                alert(data.message);
-                return;
-            }
-
-            uploadedFilePath = data.file_path;
-            fileInfoDiv.innerHTML = `
-                <h3>File Information:</h3>
-                <p><strong>Total Rows:</strong> ${data.file_info.total_rows}</p>
-                <p><strong>Total Columns:</strong> ${data.file_info.total_columns}</p>
-                <p><strong>Column Names:</strong> ${data.file_info.column_names.join(', ')}</p>
-            `;
-            progressContainer.style.display = 'block';
-        };
-
-        translateButton.onclick = async function() {
-            const targetLang = document.querySelector('#target_lang').value;
-
-            const response = await fetch('/translate_progress', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    file_path: uploadedFilePath,
-                    target_lang: targetLang
-                })
-            });
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder('utf-8');
-            let progress = 0;
-
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) break;
-
-                const chunk = decoder.decode(value, { stream: true });
-                const messages = chunk.split('\n').filter(Boolean);
-
-                for (const message of messages) {
-                    if (message.startsWith('data: ')) {
-                        const data = message.replace('data: ', '').trim();
-
-                        if (data.includes('complete|')) {
-                            const [_, downloadUrl] = data.split('|');
-                            progressBarFill.style.width = '100%';
-                            progressBarFill.textContent = '100%';
-                            progressContainer.innerHTML += `<p><a href="${downloadUrl}" target="_blank">Download Translated File</a></p>`;
-                            return;
-                        } else if (data.includes('error|')) {
-                            const [_, errorMessage] = data.split('|');
-                            alert(`Error: ${errorMessage}`);
-                            return;
-                        } else {
-                            progress = parseInt(data);
-                            progressBarFill.style.width = `${progress}%`;
-                            progressBarFill.textContent = `${progress}%`;
-                        }
-                    }
-                }
-            }
-        };
-    </script>
-</body>
-</html>

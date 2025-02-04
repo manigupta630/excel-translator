@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,6 +35,44 @@
             margin-top: 0;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
+        /* Profile Icon */
+        .profile-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 18px;
+            color: #0C8BCF;
+            cursor: pointer;
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: 30px;
+            right: 0;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: none;
+            z-index: 10;
+        }
+
+        .profile-menu a {
+            display: block;
+            padding: 10px 20px;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .profile-menu a:last-child {
+            border-bottom: none;
+        }
+
+        .profile-menu a:hover {
+            background-color: #f1f1f1;
+        }
+
 
         .form-group {
             margin-bottom: 20px;
@@ -144,6 +183,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Excel File Translator</h1>
@@ -151,12 +191,53 @@
             <label for="file">Upload Excel File:</label>
             <input type="file" name="file" id="file" required>
         </div>
-        
+
         <div class="form-group">
-            <label for="email">Email Address: 
-                <span class="info-icon" data-tooltip="Optional: If you provide an email, we will send the translated file to your inbox once it's done.">i</span>
+            <label for="email">Email Address:
+                <span class="info-icon"
+                    data-tooltip="Optional: If you provide an email, we will send the translated file to your inbox once it's done.">i</span>
             </label>
             <input type="email" name="email" id="email" placeholder="Enter your email (optional)">
+        </div>
+
+        <!-- Profile Icon and Menu -->
+        <div class="profile-container" id="profile-container">
+            <img src="profile-icon.png" alt="Profile" id="profile-icon"
+                style="width: 30px; height: 30px; border-radius: 50%;">
+            <div class="profile-menu" id="profile-menu">
+                <span id="user-email"></span> <!-- User's email will be displayed here -->
+                <a href="#" id="logout-link" style="display:none;">Logout</a>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="source-lang">Source Language:</label>
+            <select name="source-lang" id="source-lang">
+                <option value="auto">Auto</option>
+                <option value="en">English (en)</option>
+                <option value="fr">French (fr)</option>
+                <option value="es">Spanish (es)</option>
+                <option value="it">Italian (it)</option>
+                <option value="hi">Hindi</option>
+                <option value="zh">Chinese (Simplified)</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="ar">Arabic</option>
+                <option value="ru">Russian</option>
+                <option value="pt">Portuguese</option>
+                <option value="nl">Dutch</option>
+                <option value="pl">Polish</option>
+                <option value="sv">Swedish</option>
+                <option value="da">Danish</option>
+                <option value="tr">Turkish</option>
+                <option value="th">Thai</option>
+                <option value="vi">Vietnamese</option>
+                <option value="ms">Malay</option>
+                <option value="ta">Tamil</option>
+                <option value="bn">Bengali</option>
+                <option value="ur">Urdu</option>
+                <option value="fa">Persian</option>
+            </select>
         </div>
 
         <button id="upload-button">Upload File</button>
@@ -176,8 +257,27 @@
                 <option value="fr">French (fr)</option>
                 <option value="es">Spanish (es)</option>
                 <option value="it">Italian (it)</option>
+                <option value="hi">Hindi</option>
+                <option value="zh">Chinese (Simplified)</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="ar">Arabic</option>
+                <option value="ru">Russian</option>
+                <option value="pt">Portuguese</option>
+                <option value="nl">Dutch</option>
+                <option value="pl">Polish</option>
+                <option value="sv">Swedish</option>
+                <option value="da">Danish</option>
+                <option value="tr">Turkish</option>
+                <option value="th">Thai</option>
+                <option value="vi">Vietnamese</option>
+                <option value="ms">Malay</option>
+                <option value="ta">Tamil</option>
+                <option value="bn">Bengali</option>
+                <option value="ur">Urdu</option>
+                <option value="fa">Persian</option>
             </select>
-            <button id="translate-button">Translate File</button>
+            <button id="translate-button">Translate File </button>
             <div class="progress-container">
                 <div class="progress-bar">
                     <div id="progress-bar-fill" class="progress-bar-fill">0%</div>
@@ -187,97 +287,187 @@
         </div>
     </div>
 
-   <script>
-const uploadButton = document.getElementById('upload-button');
-const fileInfoDiv = document.getElementById('file-info');
-const totalRowsSpan = document.getElementById('total-rows');
-const totalColumnsSpan = document.getElementById('total-columns');
-const columnNamesSpan = document.getElementById('column-names');
-const translationContainer = document.getElementById('translation-container');
-const translateButton = document.getElementById('translate-button');
-const progressBarFill = document.getElementById('progress-bar-fill');
-const downloadLink = document.getElementById('download-link');
-let uploadedFilePath = '';
+    <script>
+        const uploadButton = document.getElementById('upload-button');
+        const fileInfoDiv = document.getElementById('file-info');
+        const totalRowsSpan = document.getElementById('total-rows');
+        const totalColumnsSpan = document.getElementById('total-columns');
+        const columnNamesSpan = document.getElementById('column-names');
+        const translationContainer = document.getElementById('translation-container');
+        const translateButton = document.getElementById('translate-button');
+        const progressBarFill = document.getElementById('progress-bar-fill');
+        const downloadLink = document.getElementById('download-link');
+        let uploadedFilePath = '';
+        const profileContainer = document.getElementById('profile-container');
+        const profileMenu = document.getElementById('profile-menu');
+        const logoutLink = document.getElementById('logout-link');
+        const userEmailSpan = document.getElementById('user-email');
 
-uploadButton.addEventListener('click', async () => {
-    const fileInput = document.getElementById('file');
-    const emailInput = document.getElementById('email'); // Email input
-    const formData = new FormData();
-    formData.append('file', fileInput.files[0]);
-    formData.append('email', emailInput.value || ''); // Include email if provided
+        // Show/Hide the profile menu
+        profileContainer.addEventListener('click', () => {
+            profileMenu.style.display = profileMenu.style.display === 'block' ? 'none' : 'block';
+        });
 
-    const response = await fetch('/upload', {
-        method: 'POST',
-        body: formData
-    });
+        // Fetch user email if logged in
+        async function getUserEmail() {
+            const response = await fetch('/me');
+            if (response.ok) {
+                const data = await response.json();
+                userEmailSpan.textContent = data.email;
+                logoutLink.style.display = 'block';  // Show logout link
+            } else {
+                userEmailSpan.textContent = '';  // No email if not logged in
+                logoutLink.style.display = 'none';  // Hide logout if not logged in
+            }
+        }
 
-    const data = await response.json();
+        // Call the function to check if the user is logged in
+        getUserEmail();
 
-    if (data.status === 'error') {
-        alert(data.message);
-        return;
+        // Handle Logout
+        logoutLink.addEventListener('click', async () => {
+            const response = await fetch('/logout');
+            if (response.ok) {
+                window.location.reload();  // Reload to reflect logout
+            }
+        });
+
+        uploadButton.addEventListener('click', async () => {
+            const fileInput = document.getElementById('file');
+            const emailInput = document.getElementById('email'); // Email input
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('email', emailInput.value || ''); // Include email if provided
+
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'error') {
+                alert(data.message);
+                return;
+            }
+
+            uploadedFilePath = data.file_path;
+            fileInfoDiv.style.display = 'block';
+            totalRowsSpan.textContent = data.file_info.total_rows;
+            totalColumnsSpan.textContent = data.file_info.total_columns;
+            columnNamesSpan.textContent = data.file_info.column_names.join(', ');
+            translationContainer.style.display = 'block';
+        });
+
+        translateButton.addEventListener('click', async () => {
+            const targetLang = document.getElementById('target-lang').value;
+            const sourceLang = document.getElementById('source-lang').value;
+            const emailInput = document.getElementById('email').value || ''; // Get email value
+
+            const response = await fetch('/translate_progress', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    file_path: uploadedFilePath,
+                    source_lang: sourceLang,
+                    target_lang: targetLang,
+                    email: emailInput // Include email in the request
+                })
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let progress = 0;
+
+ // Function to create and show a toaster notification
+function showToasterMessage(message) {
+    const toaster = document.createElement('div');
+    toaster.id = 'toaster-message';
+    toaster.textContent = message;
+    toaster.style.position = 'fixed';
+    toaster.style.bottom = '20px';
+    toaster.style.left = '50%';
+    toaster.style.transform = 'translateX(-50%)';
+    toaster.style.backgroundColor = '#4CAF50';
+    toaster.style.color = 'white';
+    toaster.style.padding = '10px 20px';
+    toaster.style.borderRadius = '5px';
+    toaster.style.fontSize = '16px';
+    toaster.style.zIndex = '9999';
+    toaster.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+
+    document.body.appendChild(toaster);
+}
+
+// Function to remove the toaster **instantly**
+function removeToaster() {
+    const existingToaster = document.getElementById('toaster-message');
+    if (existingToaster) {
+        existingToaster.remove();
     }
+}
 
-    uploadedFilePath = data.file_path;
-    fileInfoDiv.style.display = 'block';
-    totalRowsSpan.textContent = data.file_info.total_rows;
-    totalColumnsSpan.textContent = data.file_info.total_columns;
-    columnNamesSpan.textContent = data.file_info.column_names.join(', ');
-    translationContainer.style.display = 'block';
-});
+let toasterVisible = false; // Track toaster visibility
 
-translateButton.addEventListener('click', async () => {
-    const targetLang = document.getElementById('target-lang').value;
-    const emailInput = document.getElementById('email').value || ''; // Get email value
+while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
 
-    const response = await fetch('/translate_progress', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            file_path: uploadedFilePath,
-            target_lang: targetLang,
-            email: emailInput // Include email in the request
-        })
-    });
+    const chunk = decoder.decode(value, { stream: true });
+    const messages = chunk.split('\n').filter(Boolean);
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-    let progress = 0;
+    for (const message of messages) {
+        if (message.startsWith('data: ')) {
+            const data = message.replace('data: ', '').trim();
 
-    while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
+            if (data.includes('complete|')) {
+                const [_, downloadUrl] = data.split('|');
 
-        const chunk = decoder.decode(value, { stream: true });
-        const messages = chunk.split('\n').filter(Boolean);
+                // Ensure progress is 100%
+                progressBarFill.style.width = '100%';
+                progressBarFill.textContent = '100%';
 
-        for (const message of messages) {
-            if (message.startsWith('data: ')) {
-                const data = message.replace('data: ', '').trim();
+                // Show toaster if not already visible
+                if (!toasterVisible) {
+                    showToasterMessage('File is preparing...');
+                    toasterVisible = true;
+                }
 
-                if (data.includes('complete|')) {
-                    const [_, downloadUrl] = data.split('|');
-                    progressBarFill.style.width = '100%';
-                    progressBarFill.textContent = '100%';
-                    downloadLink.href = downloadUrl;
-                    downloadLink.style.display = 'block';
-                    return; // Translation completed
-                } else if (data.includes('error|')) {
-                    const [_, errorMessage] = data.split('|');
-                    alert(`Error: ${errorMessage}`);
-                    return; // Stop on error
-                } else {
-                    progress = parseInt(data);
-                    progressBarFill.style.width = `${progress}%`;
-                    progressBarFill.textContent = `${progress}%`;
+                // Show download link **immediately**
+                downloadLink.href = downloadUrl;
+                downloadLink.style.display = 'block';
+
+                // Remove toaster **immediately** when link appears
+                removeToaster();
+                toasterVisible = false; // Reset flag
+
+                return; // Translation completed
+            } else if (data.includes('error|')) {
+                const [_, errorMessage] = data.split('|');
+                alert(`Error: ${errorMessage}`);
+                return;
+            } else {
+                progress = parseInt(data);
+                progressBarFill.style.width = `${progress}%`;
+                progressBarFill.textContent = `${progress}%`;
+
+                // Show toaster **only at 100%** if it's not already visible
+                if (progress === 100 && !toasterVisible) {
+                    showToasterMessage('File is preparing...');
+                    toasterVisible = true;
                 }
             }
         }
     }
-});
+}
 
-   </script>
+
+
+        });
+
+    </script>
 </body>
+
 </html>
